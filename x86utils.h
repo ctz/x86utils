@@ -31,12 +31,14 @@ extern "C" {
 extern const char * x86_get_vendor_id(void);
 extern const char * x86_get_brand_string(void);
 
-#define FEAT(name, bit) x86_feature_##name = (1<<bit),
-
 enum x86_features_1
 {
   /* low ecx */
 #define X86_FEATURES_1  \
+  FEAT(HYPERVISOR, 31)  \
+  FEAT(RDRND, 30)       \
+  FEAT(F16C, 29)        \
+  FEAT(AVX, 28)         \
   FEAT(OSXSAVE, 27)     \
   FEAT(XSAVE, 26)       \
   FEAT(AES, 25)         \
@@ -61,13 +63,29 @@ enum x86_features_1
   FEAT(PCLMULDQ, 1)     \
   FEAT(SSE3, 0)
 
+#define FEAT(name, bit) x86_feature_1_##name = (1<<bit),
   X86_FEATURES_1
+#undef FEAT
 };
 
 enum x86_features_2
 {
   /* high ecx */
 #define X86_FEATURES_2  \
+  FEAT(PCX_L2I, 28)     \
+  FEAT(PERFTSC, 27)     \
+  FEAT(DBX, 26)         \
+  FEAT(PERFCTR_NB, 24)  \
+  FEAT(PERFCTR_CORE, 23)\
+  FEAT(TOPOEXT, 22)     \
+  FEAT(TBM, 21)         \
+  FEAT(NODEID, 19)      \
+  FEAT(TCE, 17)         \
+  FEAT(FME4, 16)        \
+  FEAT(LWP, 15)         \
+  FEAT(WDT, 13)         \
+  FEAT(SKINIT, 12)      \
+  FEAT(XOP, 11)         \
   FEAT(IBS, 10)         \
   FEAT(OSVW, 9)         \
   FEAT(3DNowPrefetch, 8)\
@@ -80,12 +98,17 @@ enum x86_features_2
   FEAT(CmpLegacy, 1)    \
   FEAT(LahfSahf, 0)
 
+#define FEAT(name, bit) x86_feature_2_##name = (1<<bit),
   X86_FEATURES_2
+#undef FEAT
 };
 
 enum x86_features_3
 {
+  /* low edx */
 #define X86_FEATURES_3  \
+  FEAT(PBE, 31)         \
+  FEAT(IA64, 30)        \
   FEAT(TM, 29)          \
   FEAT(HTT, 28)         \
   FEAT(SSE2, 26)        \
@@ -111,37 +134,102 @@ enum x86_features_3
   FEAT(VME, 1)          \
   FEAT(FPU, 0)
   
+#define FEAT(name, bit) x86_feature_3_##name = (1<<bit),
   X86_FEATURES_3
+#undef FEAT
 };
 
 enum x86_features_4
 {
+  /* high edx */
 #define X86_FEATURES_4  \
   FEAT(3DNow, 31)       \
   FEAT(3DNowExt, 30)    \
-  FEAT(LM, 29)          \
+  FEAT(Long, 29)        \
   FEAT(RDTSCP, 27)      \
   FEAT(Page1GB, 26)     \
-  FEAT(FFXSR, 25)       \
-  FEAT(MmxExt, 22)      \
+  FEAT(FXSR_OPT, 25)    \
+  FEAT(FXSR, 24)        \
+  FEAT(MMX, 23)         \
+  FEAT(MMXExt, 22)      \
   FEAT(NX, 20)          \
-  FEAT(SysCallRet, 11)
+  FEAT(MP, 19)          \
+  FEAT(PSE36, 17)       \
+  FEAT(PAT, 16)         \
+  FEAT(CMOV, 15)        \
+  FEAT(MCA, 14)         \
+  FEAT(PGE, 13)         \
+  FEAT(MTRR, 12)        \
+  FEAT(SysCall, 11)     \
+  FEAT(APIC, 9)         \
+  FEAT(CMPXCHG8B, 8)    \
+  FEAT(MCE, 7)          \
+  FEAT(PAE, 6)          \
+  FEAT(MSR, 5)          \
+  FEAT(TSC, 4)          \
+  FEAT(PSE, 3)          \
+  FEAT(DE, 2)           \
+  FEAT(VME, 1)          \
+  FEAT(FPU, 0)
 
+#define FEAT(name, bit) x86_feature_4_##name = (1<<bit),
   X86_FEATURES_4
+#undef FEAT
 };
 
+enum x86_features_5
+{
+  /* ebx extended */
+#define X86_FEATURES_5  \
+  FEAT(AVX512VL, 31)    \
+  FEAT(AVX512BW, 30)    \
+  FEAT(SHA, 29)         \
+  FEAT(AVX512CD, 28)    \
+  FEAT(AVX512ER, 27)    \
+  FEAT(AVX512PF, 26)    \
+  FEAT(IPT, 25)         \
+  FEAT(CLWB, 24)        \
+  FEAT(CLFLUSHOPT, 23)  \
+  FEAT(PCOMMIT, 22)     \
+  FEAT(AVX512IFMA, 21)  \
+  FEAT(SMAP, 20)        \
+  FEAT(ADX, 19)         \
+  FEAT(RDSEED, 18)      \
+  FEAT(AVX512DQ, 17)    \
+  FEAT(AVX512F, 16)     \
+  FEAT(PQE, 15)         \
+  FEAT(MPX, 14)         \
+  FEAT(xFPUCS, 13)      \
+  FEAT(PQM, 12)         \
+  FEAT(RTM, 11)         \
+  FEAT(INVPCID, 10)     \
+  FEAT(ERMS, 9)         \
+  FEAT(BMI2, 8)         \
+  FEAT(SMEP, 7)         \
+  FEAT(AVX2, 5)         \
+  FEAT(HLE, 4)          \
+  FEAT(BMI1, 3)         \
+  FEAT(SGX, 2)          \
+  FEAT(TSCAdjust, 1)    \
+  FEAT(FSGSBase, 0)
+
+#define FEAT(name, bit) x86_feature_5_##name = (1<<bit),
+  X86_FEATURES_5
 #undef FEAT
+};
 
 extern enum x86_features_1 x86_get_features_1(void);
 extern enum x86_features_2 x86_get_features_2(void);
 extern enum x86_features_3 x86_get_features_3(void);
 extern enum x86_features_4 x86_get_features_4(void);
+extern enum x86_features_5 x86_get_features_5(void);
 
-#define x86_has_sse()       (x86_get_features_3() & x86_feature_SSE)
-#define x86_has_sse2()      (x86_get_features_3() & x86_feature_SSE2)
-#define x86_has_sse3()      (x86_get_features_1() & x86_feature_SSE3)
-#define x86_has_pclmuldq()  (x86_get_features_1() & x86_feature_PCLMULDQ)
-#define x86_has_aes()       (x86_get_features_1() & x86_feature_AES)
+#define x86_has_sse()       (x86_get_features_3() & x86_feature_3_SSE)
+#define x86_has_sse2()      (x86_get_features_3() & x86_feature_3_SSE2)
+#define x86_has_sse3()      (x86_get_features_1() & x86_feature_1_SSE3)
+#define x86_has_pclmuldq()  (x86_get_features_1() & x86_feature_1_PCLMULDQ)
+#define x86_has_aes()       (x86_get_features_1() & x86_feature_1_AES)
+#define x86_has_sha()       (x86_get_features_5() & x86_feature_5_SHA)
 
 #ifdef __cplusplus
 }

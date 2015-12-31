@@ -11,7 +11,7 @@ int main(void)
          x86_get_vendor_id(),
          x86_get_brand_string());
 
-#define FEAT(name, bit) if (e & (1 << bit)) printf(#name " "); else printf("!" #name " ");
+#define FEAT(name, bit) if (e & (1 << bit)) printf(#name " ");
 
   e = x86_get_features_1();
   printf("features-1: ");
@@ -33,6 +33,11 @@ int main(void)
   X86_FEATURES_4;
   printf("\n");
   
+  e = x86_get_features_5();
+  printf("features-5: ");
+  X86_FEATURES_5;
+  printf("\n");
+  
   if (x86_has_sse())
     printf("x86_has_sse\n");
   
@@ -47,6 +52,9 @@ int main(void)
   
   if (x86_has_aes())
     printf("x86_has_aes\n");
+  
+  if (x86_has_sha())
+    printf("x86_has_sha\n");
 
   return 0;
 }

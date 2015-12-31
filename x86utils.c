@@ -21,9 +21,8 @@
  * THE SOFTWARE.
  */
  
+#include <stdint.h>
 #include "x86utils.h"
-
-typedef unsigned int u32;
 
 #ifdef _MSC_VER
 # undef GNU_AS
@@ -33,20 +32,21 @@ typedef unsigned int u32;
 # error "platform not supported"
 #endif
 
-static int cpuid(int op, int reg)
+static uint32_t cpuid(uint32_t op, uint32_t extra_ecx, uint32_t reg)
 {
-  u32 output[4];
+  uint32_t output[4];
 
 #ifdef GNU_AS
   __asm__
      ("cpuid;"
          : "=a"(output[0]), "=b"(output[1]), "=c"(output[2]), "=d"(output[3])
-         : "a"(op)
+         : "a"(op), "c"(extra_ecx)
      );
 #else
   __asm
   {
     mov eax, op
+    mov ecx, extra_ecx
     cpuid
     mov output, eax
     mov output+4, ebx
@@ -58,26 +58,26 @@ static int cpuid(int op, int reg)
   return output[reg];
 }
 
-static int cpuid_eax(int op) { return cpuid(op, 0); }
-static int cpuid_ebx(int op) { return cpuid(op, 1); }
-static int cpuid_ecx(int op) { return cpuid(op, 2); }
-static int cpuid_edx(int op) { return cpuid(op, 3); }
+static uint32_t cpuid_eax(uint32_t eax, uint32_t ecx) { return cpuid(eax, ecx, 0); }
+static uint32_t cpuid_ebx(uint32_t eax, uint32_t ecx) { return cpuid(eax, ecx, 1); }
+static uint32_t cpuid_ecx(uint32_t eax, uint32_t ecx) { return cpuid(eax, ecx, 2); }
+static uint32_t cpuid_edx(uint32_t eax, uint32_t ecx) { return cpuid(eax, ecx, 3); }
 
-static int max_ext_cpuid_func(void)
+static uint32_t max_ext_cpuid_func(void)
 {
-  return cpuid_eax(0x80000000) & 0x7fffffff;
+  return cpuid_eax(0x80000000, 0) & 0x7fffffff;
 }
 
-static int max_cpuid_func(void)
+static uint32_t max_cpuid_func(void)
 {
-  return cpuid_eax(0x00000000);
+  return cpuid_eax(0x00000000, 0);
 }
 
 const char * x86_get_vendor_id(void)
 {
   static union {
     char bytes[13]; /* registers not null-terminated */
-    u32 words[3];
+    uint32_t words[3];
   } data;
 
 #ifdef GNU_AS
@@ -108,7 +108,7 @@ const char * x86_get_brand_string(void)
 {
   static union {
     char bytes[3*4*4];
-    u32 words[3*4];
+    uint32_t words[3*4];
   } data;
 
   if (max_ext_cpuid_func() < 4)
@@ -170,20 +170,25 @@ const char * x86_get_brand_string(void)
 
 enum x86_features_1 x86_get_features_1(void)
 {
-  return cpuid_ecx(0x00000001);
+  return cpuid_ecx(0x00000001, 0);
 }
 
 enum x86_features_2 x86_get_features_2(void)
 {
-  return cpuid_ecx(0x80000001);
+  return cpuid_ecx(0x80000001, 0);
 }
 
 enum x86_features_3 x86_get_features_3(void)
 {
-  return cpuid_edx(0x00000001);
+  return cpuid_edx(0x00000001, 0);
 }
 
 enum x86_features_4 x86_get_features_4(void)
 {
-  return cpuid_edx(0x80000001);
+  return cpuid_edx(0x80000001, 0);
+}
+
+enum x86_features_5 x86_get_features_5(void)
+{
+  return cpuid_ebx(7, 0);
 }
